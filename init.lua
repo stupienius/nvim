@@ -1,10 +1,14 @@
--- general setting
+-------------
+-- general --
+-------------
+
 vim.g.mapleader = " "
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
+vim.opt.clipboard = "unnamedplus"
 
 -- autocmd for c/c++ file to set 4-space tab
 vim.api.nvim_create_autocmd("FileType", {
@@ -15,6 +19,10 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.opt_local.expandtab = true
 	end,
 })
+
+------------
+-- plugin --
+------------
 
 -- lazy.vim for manage vim plugin
 vim.opt.rtp:prepend("~/.config/nvim/lazy/lazy.nvim")
@@ -57,7 +65,83 @@ require("lazy").setup({
 			})
 		end,
 	},
-})
 
--- keymaps
+	-- bufferline
+	{
+		"akinsho/bufferline.nvim",
+		version = "*",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		config = function()
+			require("bufferline").setup({})
+			--vim.opt.termguicolors = true -- make sure colors look nice
+		end,
+	},
+
+	-- auto completion
+
+	{
+		"neovim/nvim-lspconfig",
+		commit = "cb33dea", -- Last commit compatible with Neovim 0.9.5
+		config = function()
+			local lspconfig = require("lspconfig")
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+			lspconfig.ts_ls.setup({
+				capabilities = capabilities,
+			})
+
+			lspconfig.clangd.setup({
+				capabilities = capabilities,
+			})
+
+			lspconfig.pyright.setup({
+				capabilities = capabilities,
+			})
+		end,
+	},
+	{
+		"hrsh7th/nvim-cmp",
+		dependencies = {
+			"hrsh7th/cmp-nvim-lsp",
+			"hrsh7th/cmp-buffer",
+			"hrsh7th/cmp-path",
+			"L3MON4D3/LuaSnip",
+			"saadparwaiz1/cmp_luasnip",
+		},
+		config = function()
+			local cmp = require("cmp")
+			local luasnip = require("luasnip")
+
+			cmp.setup({
+				snippet = {
+					expand = function(args)
+						luasnip.lsp_expand(args.body)
+					end,
+				},
+				mapping = cmp.mapping.preset.insert({
+					["<Tab>"] = cmp.mapping.select_next_item(),
+					["<S-Tab>"] = cmp.mapping.select_prev_item(),
+					["<CR>"] = cmp.mapping.confirm({ select = true }),
+					["<C-Space>"] = cmp.mapping.complete(),
+				}),
+				sources = cmp.config.sources({
+					{ name = "nvim_lsp" },
+					{ name = "luasnip" },
+					{ name = "buffer" },
+					{ name = "path" },
+				}),
+			})
+		end,
+	},
+})
+-------------
+-- keymaps --
+-------------
+
+-- filetree
 vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
+
+-- buffer
+vim.keymap.set("n", "H", ":BufferLineCycleNext<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "L", ":BufferLineCyclePrev<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>bd", ":bd<CR>", { noremap = true, silent = true })
