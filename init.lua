@@ -10,6 +10,7 @@ vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
 vim.opt.clipboard = "unnamedplus" -- use system clipboard as nvim clipboard
 vim.opt.pumheight = 8 -- popup up menu max items
+--vim.opt.termguicolors = true
 
 -- autocmd for c/c++ file to set 4-space tab
 vim.api.nvim_create_autocmd("FileType", {
@@ -79,6 +80,18 @@ require("lazy").setup({
 		event = { "BufReadPre", "BufNewFile" },
 	},
 
+	-- auto pair
+	{
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		config = function()
+			require("nvim-autopairs").setup({
+				check_ts = true, -- enable treesitter integration
+				fast_wrap = {}, -- optional: fast wrapping feature
+			})
+		end,
+	},
+
 	-- nvim-tree for file tree
 	{
 		"nvim-tree/nvim-tree.lua",
@@ -101,7 +114,6 @@ require("lazy").setup({
 
 			null_ls.setup({
 				sources = {
-					-- Example formatters:
 					null_ls.builtins.formatting.prettier, -- JS/TS/HTML/CSS
 					null_ls.builtins.formatting.stylua, -- Lua
 					null_ls.builtins.formatting.black, -- Python
@@ -127,7 +139,41 @@ require("lazy").setup({
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = function()
 			require("bufferline").setup({})
-			--vim.opt.termguicolors = true -- make sure colors look nice
+		end,
+	},
+
+	-- nvim-treesitter for idw
+	{
+		"nvim-treesitter/nvim-treesitter",
+		version = "0.9.3",
+		build = ":TSUpdate",
+		event = { "BufReadPost", "BufNewFile" },
+		config = function()
+			require("nvim-treesitter.configs").setup({
+				ensure_installed = {
+					"html",
+					"javascript",
+					"typescript",
+					"tsx",
+					"lua",
+					"c",
+					"cpp",
+					"json",
+					"css",
+				},
+				highlight = { enable = true },
+				indent = { enable = true },
+				autotag = { enable = true }, -- for nvim-ts-autotag
+			})
+		end,
+	},
+
+	-- nvim-ts-autotag for html auto tag
+	{
+		"windwp/nvim-ts-autotag",
+		event = "InsertEnter",
+		config = function()
+			require("nvim-ts-autotag").setup()
 		end,
 	},
 
@@ -223,6 +269,7 @@ require("lazy").setup({
 		config = function()
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
+			local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 
 			cmp.setup({
 				window = {
@@ -266,6 +313,7 @@ require("lazy").setup({
 					end,
 				},
 			})
+			cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 		end,
 	},
 })
