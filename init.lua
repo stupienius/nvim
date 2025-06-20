@@ -10,6 +10,9 @@ vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
 vim.opt.clipboard = "unnamedplus" -- use system clipboard as nvim clipboard
 vim.opt.pumheight = 8 -- popup up menu max items
+vim.opt.background = "dark"
+vim.opt.scrolloff = 6
+vim.opt.cursorline = true
 
 --vim.opt.termguicolors = true
 
@@ -33,6 +36,14 @@ vim.opt.rtp:prepend("~/.config/nvim/lazy/lazy.nvim")
 require("lazy").setup({
 
 	-- gruvbox for theme
+	{
+		"numToStr/Comment.nvim",
+		event = "VeryLazy",
+		config = function()
+			require("Comment").setup()
+		end,
+	},
+	"tpope/vim-commentary",
 	{
 		"ellisonleao/gruvbox.nvim",
 		priority = 1000,
@@ -501,6 +512,9 @@ require("lazy").setup({
 					null_ls.builtins.formatting.prettier, -- JS/TS/HTML/CSS
 					null_ls.builtins.formatting.stylua, -- Lua
 					null_ls.builtins.formatting.black, -- Python
+					null_ls.builtins.formatting.clang_format.with({
+						filetypes = { "c", "cpp", "objc", "objcpp" },
+					}),
 				},
 				on_attach = function(client, bufnr)
 					if client.supports_method("textDocument/formatting") then
@@ -544,8 +558,9 @@ require("lazy").setup({
 					"cpp",
 					"json",
 					"css",
+					"vue",
 				},
-				highlight = { enable = true },
+				highlight = { enable = false },
 				indent = { enable = true },
 			})
 		end,
@@ -569,6 +584,7 @@ require("lazy").setup({
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 			lspconfig.ts_ls.setup({ -- TS JS
+				filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
 				capabilities = capabilities,
 			})
 
@@ -577,6 +593,24 @@ require("lazy").setup({
 			})
 
 			lspconfig.pyright.setup({ -- python
+				capabilities = capabilities,
+			})
+
+			lspconfig.cssls.setup({
+				capabilities = capabilities,
+			})
+
+			lspconfig.html.setup({
+				capabilities = capabilities,
+			})
+
+			lspconfig.emmet_ls.setup({
+				filetypes = { "html", "css", "scss", "javascriptreact", "typescriptreact" },
+				capabilities = capabilities,
+			})
+
+			lspconfig.volar.setup({
+				filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
 				capabilities = capabilities,
 			})
 
